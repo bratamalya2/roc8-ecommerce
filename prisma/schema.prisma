@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id         Int     @id @default(autoincrement())
+    name       String
+    email      String  @unique
+    password   String
+    isVerified Boolean @default(false)
+
+    verification Verification?
+
+    categoriesOfUser CategoriesOfUser[]
+
+    @@index([email])
+}
+
+model Categories {
+    id   Int    @id @default(autoincrement())
+    name String
+
+    categoriesOfUser CategoriesOfUser[]
+}
+
+model Verification {
+    userId Int      @unique
+    otp    String
+    expiry DateTime
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model CategoriesOfUser {
+    userId     Int
+    categoryId Int
+
+    user     User       @relation(fields: [userId], references: [id])
+    category Categories @relation(fields: [categoryId], references: [id])
+
+    @@unique([userId, categoryId])
+}
