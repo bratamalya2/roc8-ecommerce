@@ -10,9 +10,9 @@ export default function VerifyEmailPage() {
 
     const email = searchParams.get("email");
 
-    return <Suspense>
-        <main className="flex w-full min-h-[780px] items-center justify-center">
+    return <main className="flex w-full min-h-[780px] items-center justify-center">
+        <Suspense>
             <VerifyEmail email={email} />
-        </main>
-    </Suspense>
+        </Suspense>
+    </main>
 }
