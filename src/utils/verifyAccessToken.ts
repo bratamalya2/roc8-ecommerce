@@ -1,4 +1,5 @@
-import { jwtVerify, ProtectedHeaderParameters } from "jose";
+import { jwtVerify } from "jose";
+import type { ProtectedHeaderParameters } from "jose";
 
 import type { User } from "~/types/User";
 
@@ -13,7 +14,7 @@ interface JWTVerification {
 
 export default async function verifyAccessToken(accessToken: string) {
     try {
-        const secretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY as string);
+        const secretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY);
 
         const x: JWTVerification = await jwtVerify(accessToken, secretKey);
 

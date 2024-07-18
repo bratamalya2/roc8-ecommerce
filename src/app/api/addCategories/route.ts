@@ -4,6 +4,7 @@ import { z } from "zod";
 import { PrismaClient } from "@prisma/client";
 
 import type { Category } from "~/types/Category";
+import type { UserFromMiddleware } from "~/types/UserFromMiddleware";
 
 const CategorySchema = z.array(
     z.object({
@@ -14,9 +15,10 @@ const CategorySchema = z.array(
 
 export async function POST(request: Request) {
     try {
-        const headersList = headers();
-        const { id: userId, email } = JSON.parse(headersList.get("user") as string);
-        const categories: Category[] = await request.json();
+        const headersList: Headers = headers();
+        const tmp = JSON.parse(headersList.get("user")!) as UserFromMiddleware;
+        const userId: number = tmp.id;
+        const categories = (await request.json()) as Category[];
 
         if (!CategorySchema.safeParse(categories).success)
             return NextResponse.json({
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
 
         const prisma = new PrismaClient();
 
-        categories.map(async (category: Category) => {
+        categories.forEach(async (category: Category) => {
             try {
                 await prisma.categoriesOfUser.create({
                     data: {

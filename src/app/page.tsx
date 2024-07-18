@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 import SignUp from "~/components/signup";
 
+import type { InitResponse } from "~/types/InitResponse";
+
 export default function HomePage() {
   const initDB = async () => {
     try {
@@ -15,7 +17,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({})
       });
-      const y = await x.json();
+      const y = (await x.json()) as InitResponse;
       if (y.isError)
         window.location.reload();
     }
@@ -25,6 +27,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     initDB();
   }, []);
 

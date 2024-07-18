@@ -13,7 +13,7 @@ async function sendMail(receiverMail: string) {
     try {
         const accessToken = await oAuth2Client.getAccessToken();
         const transport = nodemailer.createTransport({
-            // @ts-ignore
+            // @ts-expect-error service_field
             service: "gmail",
             auth: {
                 type: "OAUTH2",
@@ -24,7 +24,7 @@ async function sendMail(receiverMail: string) {
                 accessToken: accessToken
             }
         });
-        let otp: string = "";
+        let otp = "";
         for (let i = 0; i < 8; i++)
             otp = `${otp}${Math.floor(Math.random() * 10)}`;
         const mailOptions = {

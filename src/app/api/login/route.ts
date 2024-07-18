@@ -11,7 +11,7 @@ const UserSchema = z.object({
 
 export async function POST(request: Request) {
     try {
-        const { email, password } = await request.json();
+        const { email, password } = await request.json() as { email: string; password: string; };
         const user = {
             email,
             password
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
                 user: existingUser
             };
 
-            const accessTokenSecretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY as string);
+            const accessTokenSecretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY);
             let accessToken: string | null = null;
             accessToken = await new SignJWT(securedData)
                 .setProtectedHeader({ alg: "HS256", typ: "JWT" })
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
                 .setExpirationTime("10m") // Token expires in 10 minutes
                 .sign(accessTokenSecretKey);
 
-            const refreshTokenSecretKey = new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET_KEY as string);
+            const refreshTokenSecretKey = new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET_KEY);
             let refreshToken: string | null = null;
             refreshToken = await new SignJWT(securedData)
                 .setProtectedHeader({ alg: "HS256", typ: "JWT" })

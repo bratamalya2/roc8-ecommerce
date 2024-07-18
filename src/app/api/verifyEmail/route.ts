@@ -9,7 +9,7 @@ const UserSchema = z.object({
 
 export async function POST(request: Request) {
     try {
-        const { email, otp } = await request.json();
+        const { email, otp } = (await request.json()) as { email: string; otp: string; };
         const user = { email, otp };
 
         if (!UserSchema.safeParse(user).success)

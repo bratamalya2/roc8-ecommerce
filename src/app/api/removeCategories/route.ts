@@ -15,8 +15,8 @@ const CategorySchema = z.array(
 export async function DELETE(request: Request) {
     try {
         const headersList = headers();
-        const { id: userId, email } = JSON.parse(headersList.get("user") as string);
-        const categories: Category[] = await request.json();
+        const { id: userId } = JSON.parse(headersList.get("user")!) as { id: number; email: string; };
+        const categories: Category[] = await request.json() as Category[];
 
         if (!CategorySchema.safeParse(categories).success)
             return NextResponse.json({
@@ -28,13 +28,18 @@ export async function DELETE(request: Request) {
 
         const prisma = new PrismaClient();
 
-        categories.map(async (category: Category) => {
-            await prisma.categoriesOfUser.deleteMany({
-                where: {
-                    userId,
-                    categoryId: category.id
-                }
-            });
+        categories.forEach(async (category: Category) => {
+            try {
+                await prisma.categoriesOfUser.deleteMany({
+                    where: {
+                        userId,
+                        categoryId: category.id
+                    }
+                });
+            }
+            catch (err) {
+                console.log(err);
+            }
         });
 
         return NextResponse.json({

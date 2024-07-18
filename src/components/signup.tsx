@@ -8,6 +8,8 @@ import { useSnackbar } from "notistack";
 
 import Loading from "~/../public/loading.gif";
 
+import type { ApiResponse } from "~/types/ApiResponse";
+
 function SignUp() {
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
@@ -40,7 +42,7 @@ function SignUp() {
                         password
                     })
                 });
-                const apiResponse = await x.json();
+                const apiResponse = (await x.json()) as ApiResponse;
                 if (apiResponse)
                     setIsLoading(false);
                 if (!apiResponse.isError)
@@ -65,7 +67,7 @@ function SignUp() {
     };
 
     return <section className="w-[50%] h-[691px] border border-[#C1C1C1] rounded-[20px] flex flex-col items-center py-10">
-        <p className="font-semibold text-lg sm:text-3xl">Create your account</p>
+        <p className="font-semibold text-lg sm:text-3xl text-center">Create your account</p>
         <div className="my-5 w-[80%] mx-auto">
             <label>Name</label>
             <br />

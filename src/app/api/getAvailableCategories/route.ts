@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 import type { Category } from "~/types/Category";
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const prisma = new PrismaClient();
 

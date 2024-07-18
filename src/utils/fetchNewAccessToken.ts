@@ -4,7 +4,7 @@ import type { User } from "~/types/User";
 
 export default async function fetchNewAccessToken(user: User) {
     try {
-        const accessTokenSecretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY as string);
+        const accessTokenSecretKey = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET_KEY);
         let accessToken: string | null = null;
         accessToken = await new SignJWT({
             user

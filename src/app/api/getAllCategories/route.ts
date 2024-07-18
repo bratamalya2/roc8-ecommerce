@@ -5,10 +5,10 @@ import { PrismaClient } from "@prisma/client";
 import type { CategoriesOfUser } from "~/types/CategoriesOfUser";
 import type { Category } from "~/types/Category";
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const headersList = headers();
-        const { id: userId, email } = JSON.parse(headersList.get("user") as string);
+        const { id: userId } = JSON.parse(headersList.get("user")!) as { id: number; email: string; };
 
         const prisma = new PrismaClient();
 

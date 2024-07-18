@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 import VerifyEmail from "~/components/verifyEmail";
 
-export default function verifyEmail() {
+export default function VerifyEmailPage() {
     const searchParams = useSearchParams();
 
     const email = searchParams.get("email");

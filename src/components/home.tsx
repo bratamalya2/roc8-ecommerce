@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Category } from "~/types/Category";
+import type { ApiResponse } from "~/types/ApiResponse";
 
 export default function Home() {
     const router = useRouter();
@@ -15,19 +16,17 @@ export default function Home() {
     const [pageArr, setPageArr] = useState<number[]>([]);
     const [currentIndexArr, setCurrentIndexArr] = useState<number[]>([]);
 
-    const [minIndex, setMinIndex] = useState(0);
-    const [maxIndex, setMaxIndex] = useState(0);
-    const [minPage, setMinPage] = useState(0);
+    const minPage = 0;
     const [maxPage, setMaxPage] = useState(0);
 
     const fetchAvailableCategories = async () => {
         try {
             const x = await fetch("/api/getAvailableCategories");
-            const apiResponse = await x.json();
+            const apiResponse = (await x.json()) as ApiResponse;
             if (apiResponse.isError)
                 setAvailableCategories([]);
             else
-                setAvailableCategories(apiResponse.categories);
+                setAvailableCategories(apiResponse.categories!);
         }
         catch (err) {
             console.log(err);
@@ -35,10 +34,10 @@ export default function Home() {
         }
     };
 
-    const fetchSelectedCategories = async () => {
+    const fetchSelectedCategories = useCallback(async () => {
         try {
             let accessToken = localStorage.getItem("accessToken");
-            let refreshToken = localStorage.getItem("refreshToken");
+            const refreshToken = localStorage.getItem("refreshToken");
 
             let myHeaders = new Headers();
             myHeaders.append("accessToken", accessToken!);
@@ -51,18 +50,18 @@ export default function Home() {
             };
 
             const x = await fetch("/api/getAllCategories", requestOptions as RequestInit);
-            const apiResponse = await x.json();
+            const apiResponse = (await x.json()) as ApiResponse;
             if (apiResponse.isError) {
                 if (apiResponse.message === "Access Token expired!") {
-                    accessToken = apiResponse.accessToken;
+                    accessToken = apiResponse.accessToken!;
                     localStorage.setItem("accessToken", apiResponse.accessToken!);
                     myHeaders = new Headers();
-                    myHeaders.append("accessToken", accessToken!);
+                    myHeaders.append("accessToken", accessToken);
                     myHeaders.append("refreshToken", refreshToken!);
                     requestOptions.headers = myHeaders;
                     const x2 = await fetch("/api/getAllCategories", requestOptions as RequestInit);
-                    const apiResponse2 = await x2.json();
-                    setSelectedCategories(apiResponse2.selectedCategories);
+                    const apiResponse2 = (await x2.json()) as ApiResponse;
+                    setSelectedCategories(apiResponse2.selectedCategories!);
                     localStorage.setItem("selectedCategories", JSON.stringify(apiResponse2.selectedCategories));
                 }
                 else {
@@ -71,23 +70,23 @@ export default function Home() {
                 }
             }
             else {
-                localStorage.setItem("selectedCategories", JSON.stringify(apiResponse.selectedCategories));
-                setSelectedCategories(apiResponse.selectedCategories);
+                localStorage.setItem("selectedCategories", JSON.stringify(apiResponse.selectedCategories!));
+                setSelectedCategories(apiResponse.selectedCategories!);
             }
         }
         catch (err) {
             console.log(err);
             setSelectedCategories([]);
         }
-    };
+    }, [router]);
 
-    const removeCategories = async () => {
+    const removeCategories = useCallback(async () => {
         try {
-            const removeCats: Category[] = JSON.parse(localStorage.getItem("currentlyRemovedCategories")!);
+            const removeCats: Category[] = JSON.parse(localStorage.getItem("currentlyRemovedCategories")!) as Category[];
             if (removeCats === null)
                 return;
             let accessToken = localStorage.getItem("accessToken");
-            let refreshToken = localStorage.getItem("refreshToken");
+            const refreshToken = localStorage.getItem("refreshToken");
 
             let myHeaders = new Headers();
             myHeaders.append("accessToken", accessToken!);
@@ -102,18 +101,18 @@ export default function Home() {
             };
 
             const x = await fetch("/api/removeCategories", requestOptions as RequestInit);
-            const apiResponse = await x.json();
+            const apiResponse = (await x.json()) as ApiResponse;
             if (apiResponse.isError) {
                 if (apiResponse.message === "Access Token expired!") {
-                    accessToken = apiResponse.accessToken;
+                    accessToken = apiResponse.accessToken!;
                     localStorage.setItem("accessToken", apiResponse.accessToken!);
                     myHeaders = new Headers();
-                    myHeaders.append("accessToken", accessToken!);
+                    myHeaders.append("accessToken", accessToken);
                     myHeaders.append("refreshToken", refreshToken!);
                     requestOptions.headers = myHeaders;
                     const x2 = await fetch("/api/removeCategories", requestOptions as RequestInit);
                     await x2.json();
-                    fetchSelectedCategories();
+                    await fetchSelectedCategories();
                 }
                 else {
                     setSelectedCategories([]);
@@ -121,21 +120,21 @@ export default function Home() {
                 }
             }
             else
-                fetchSelectedCategories();
+                await fetchSelectedCategories();
         }
         catch (err) {
             console.log(err);
         }
-    };
+    }, [fetchSelectedCategories, router]);
 
-    const addNewCategories = async () => {
+    const addNewCategories = useCallback(async () => {
         try {
             if (!localStorage.getItem("currentlySelectedCategories"))
                 return;
 
-            const currentlySelectedCats = JSON.parse(localStorage.getItem("currentlySelectedCategories")!) as Category[], newCats: Category[] = [];
+            const currentlySelectedCats = JSON.parse(localStorage.getItem("currentlySelectedCategories")!) as Category[];
             const currentlySelectedCatIds = currentlySelectedCats.map(a => a.id);
-            const selectedCatIds = JSON.parse(localStorage.getItem("selectedCategories")!).map((a: Category) => a.id);
+            const selectedCatIds = ((JSON.parse(localStorage.getItem("selectedCategories")!) as Category[]).map((a: Category) => a.id));
             const nonMathcingIds: number[] = currentlySelectedCatIds.filter(a => !selectedCatIds.includes(a));
             const nonMatchingCategories: Category[] = currentlySelectedCats.filter(a => nonMathcingIds.includes(a.id));
 
@@ -143,7 +142,7 @@ export default function Home() {
                 return;
 
             let accessToken = localStorage.getItem("accessToken");
-            let refreshToken = localStorage.getItem("refreshToken");
+            const refreshToken = localStorage.getItem("refreshToken");
 
             let myHeaders = new Headers();
             myHeaders.append("accessToken", accessToken!);
@@ -158,18 +157,18 @@ export default function Home() {
             };
 
             const x = await fetch("/api/addCategories", requestOptions as RequestInit);
-            const apiResponse = await x.json();
+            const apiResponse = (await x.json()) as ApiResponse;
             if (apiResponse.isError) {
                 if (apiResponse.message === "Access Token expired!") {
-                    accessToken = apiResponse.accessToken;
+                    accessToken = apiResponse.accessToken!;
                     localStorage.setItem("accessToken", apiResponse.accessToken!);
                     myHeaders = new Headers();
-                    myHeaders.append("accessToken", accessToken!);
+                    myHeaders.append("accessToken", accessToken);
                     myHeaders.append("refreshToken", refreshToken!);
                     requestOptions.headers = myHeaders;
                     const x2 = await fetch("/api/addCategories", requestOptions as RequestInit);
                     await x2.json();
-                    fetchSelectedCategories();
+                    await fetchSelectedCategories();
                 }
                 else {
                     setSelectedCategories([]);
@@ -177,16 +176,16 @@ export default function Home() {
                 }
             }
             else
-                fetchSelectedCategories();
+                await fetchSelectedCategories();
         }
         catch (err) {
             console.log(err);
             setSelectedCategories([]);
         }
-    };
+    }, [fetchSelectedCategories, router]);
 
     const handleCheckboxClick = (id: number) => {
-        if (!currentlySelectedCategories.map(x => x.id).includes(availableCategories[id]?.id!)) {
+        if (!currentlySelectedCategories.map(x => x.id).includes((availableCategories[id]!).id)) {
             const arr = [...currentlySelectedCategories];
             arr.push(availableCategories[id]!);
             setCurrentlySelectedCategories(arr);
@@ -195,36 +194,37 @@ export default function Home() {
         else {
             setCurrentlySelectedCategories(curr => {
                 let a = [...curr];
-                a = a.filter(obj => obj.id !== availableCategories[id]?.id!);
+                a = a.filter(obj => obj.id !== (availableCategories[id]!).id);
                 localStorage.setItem("currentlySelectedCategories", JSON.stringify(a));
                 return a;
             });
             setCurrentlyRemovedCategories(curr => {
-                let a = [...curr];
+                const a = [...curr];
                 a.push(availableCategories[id]!);
                 localStorage.setItem("currentlyRemovedCategories", JSON.stringify(a));
                 return a;
             });
         }
-        if (currentlyRemovedCategories.map(x => x.id).includes(availableCategories[id]?.id!)) {
+        if (currentlyRemovedCategories.map(x => x.id).includes((availableCategories[id]!).id)) {
             let arr = [...currentlyRemovedCategories];
-            arr = arr.filter(x => x.id !== availableCategories[id]?.id!);
+            arr = arr.filter(x => x.id !== availableCategories[id]!.id);
             setCurrentlyRemovedCategories(arr);
             localStorage.setItem("currentlyRemovedCategories", JSON.stringify(arr));
         }
     };
 
     useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         fetchAvailableCategories();
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         fetchSelectedCategories();
-    }, []);
+    }, [fetchSelectedCategories]);
 
     useEffect(() => {
         setCurrentlySelectedCategories(selectedCategories);
     }, [selectedCategories]);
 
     useEffect(() => {
-        setMaxIndex(availableCategories.length);
         let totalPages: number;
         if (availableCategories.length % 6 === 0)
             totalPages = availableCategories.length / 6;
@@ -236,13 +236,15 @@ export default function Home() {
     useEffect(() => {
         window.addEventListener("beforeunload", (e: Event) => {
             e.preventDefault();
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             addNewCategories();
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             removeCategories();
             localStorage.removeItem("selectedCategories");
             localStorage.removeItem("currentlySelectedCategories");
             localStorage.removeItem("currentlyRemovedCategories");
         });
-    }, [currentPage]);
+    }, [currentPage, addNewCategories, removeCategories]);
 
     useEffect(() => {
         const arr: number[] = [];
@@ -254,7 +256,7 @@ export default function Home() {
         }
         setPageArr(arr);
 
-        let arr2: number[] = [];
+        const arr2: number[] = [];
         for (let i = currentPage * 6; i < (currentPage + 1) * 6; i++) {
             if (i >= availableCategories.length)
                 break;
@@ -263,9 +265,9 @@ export default function Home() {
         setCurrentIndexArr(arr2);
     }, [availableCategories, currentPage, maxPage]);
 
-    return <section className="w-[50%] h-[658px] border border-[#C1C1C1] rounded-[20px] flex flex-col items-center py-10 px-10">
-        <p className="font-semibold text-3xl my-5">Please mark your interests!</p>
-        <p className="my-3">We will keep you notified.</p>
+    return <section className="w-[85%] sm:w-[50%] h-[658px] border border-[#C1C1C1] rounded-[20px] flex flex-col items-center py-10 px-10">
+        <p className="font-semibold text-3xl my-5 text-center">Please mark your interests!</p>
+        <p className="my-3 text-center">We will keep you notified.</p>
         <p className="my-2 font-medium text-xl self-start">My saved interests!</p>
         <section className="self-start flex flex-col justify-around my-12 gap-y-3">
             {
@@ -275,15 +277,15 @@ export default function Home() {
                             type="checkbox"
                             id={availableCategories[index]?.id!.toString()}
                             className="w-[24px] h-[24px] rounded-[4px] accent-black hover:cursor-pointer"
-                            onChange={() => handleCheckboxClick(availableCategories[index]?.id! - 1)}
-                            checked={currentlySelectedCategories?.map(x => x.id).includes(availableCategories[index]?.id!) || false}
+                            onChange={() => handleCheckboxClick(availableCategories[index]!.id - 1)}
+                            checked={currentlySelectedCategories?.map(x => x.id).includes(availableCategories[index]!.id) || false}
                         />
                         <label htmlFor={availableCategories[index]?.id!.toString()} className="ml-5">{availableCategories[index]?.name}</label>
                     </div>
                 )
             }
         </section>
-        <section className="flex w-[50%] justify-between self-start my-5">
+        <section className="flex w-[80%] md:w-[50%] justify-between self-start my-5">
             <div className="hover:cursor-pointer" onClick={() => setCurrentPage(minPage)}>&lt;&lt;</div>
             <div className="hover:cursor-pointer" onClick={() => {
                 if (currentPage > 0)

@@ -13,7 +13,7 @@ const UserSchema = z.object({
 
 export async function POST(request: Request) {
     try {
-        const { name, email, password } = await request.json();
+        const { name, email, password } = (await request.json()) as { name: string; email: string; password: string; };
 
         const user = {
             name,
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
                 status: 500
             })
 
-        let date = new Date();
+        const date = new Date();
         date.setDate(date.getDate() + 1);
 
         await prisma.verification.create({

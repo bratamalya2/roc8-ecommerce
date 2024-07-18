@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { faker } from '@faker-js/faker';
 
+import type { Category } from "~/types/Category";
+
 export async function POST() {
     try {
         const prisma = new PrismaClient();
 
-        let categories = await prisma.categories.findMany();
+        let categories = (await prisma.categories.findMany()) as Category[];
 
         if (categories.length < 100) {
             for (let i = 0; i < 100 - categories.length; i++) {
