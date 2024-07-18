@@ -7,7 +7,7 @@ import type { Category } from "~/types/Category";
 
 export async function GET() {
     try {
-        const headersList = headers();
+        const headersList = headers() as Headers;
         const { id: userId } = JSON.parse(headersList.get("user")!) as { id: number; email: string; };
 
         const prisma = new PrismaClient();
